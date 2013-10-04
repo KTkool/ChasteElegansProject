@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<statechart>
+<!-- NB: in the statecharts tool the highest level state is orthogonal...could be a problem -->
+    <!-- Forward declare all events: Ev* -->
+    <event name="d"/>
+    <event name="m"/>
+    <event name="gld1down"/>
+    <event name="gld1up"/>
+    <event name="lag1down"/>
+    <event name="lag1up"/>
+    <event name="glp1abs"/>
+    <event name="glp1act"/>
+    <event name="glp1inact"/>
+    <event name="glp1bind"/>
+
+    <!-- Forward declare events to propagate EvCheckCellData: EV*Update -->
+    <update name="Living"/>
+    <update name="Mitosis"/>
+    <update name="Active"/>
+    <update name="Active"/>
+    <update name="Unbound"/>
+
+    <!-- Events that force a statemachine into a state: EvGoTo* -->
+    <goto name="Dead"/>
+    <goto name="Living"/>
+    <goto name="Meiosis"/>
+    <goto name="Mitosis"/>
+    <goto name="Inactive"/>
+    <goto name="Active"/>
+    <goto name="Inactive"/>
+    <goto name="Active"/>
+    <goto name="Absent"/>
+    <goto name="Active"/>
+    <goto name="Inactive"/>
+    <goto name="Bound"/>
+    <goto name="Unbound"/>
+
+    <!-- states -->
+    <simple_state name="CellStateChart_Life_Dead" parent="CellStateChart_Life"/>
+    <simple_state name="CellStateChart_Life_Living" parent="CellStateChart_Life"/>
+    <compound_state name="CellStateChart_Life" parent="CellStateChart" start="CellStateChart_Life_Living"/>
+    <simple_state name="CellStateChart_Abstract_Meiosis" parent="CellStateChart_Abstract"/>
+    <simple_state name="CellStateChart_Abstract_Mitosis" parent="CellStateChart_Abstract"/>
+    <compound_state name="CellStateChart_Abstract" parent="CellStateChart" start="CellStateChart_Abstract_Mitosis"/>
+    <simple_state name="CellStateChart_Cytoplasm_GLD1_Inactive" parent="CellStateChart_Cytoplasm_GLD1"/>
+    <simple_state name="CellStateChart_Cytoplasm_GLD1_Active" parent="CellStateChart_Cytoplasm_GLD1"/>
+    <compound_state name="CellStateChart_Cytoplasm_GLD1" parent="CellStateChart" start="CellStateChart_Cytoplasm_GLD1_Active"/>
+    <simple_state name="CellStateChart_Cytoplasm_LAG1_Inactive" parent="CellStateChart_Cytoplasm_LAG1"/>
+    <simple_state name="CellStateChart_Cytoplasm_LAG1_Active" parent="CellStateChart_Cytoplasm_LAG1"/>
+    <compound_state name="CellStateChart_Cytoplasm_LAG1" parent="CellStateChart" start="CellStateChart_Cytoplasm_LAG1_Active"/>
+    <simple_state name="CellStateChart_Membrane_GLP1_Absent" parent="CellStateChart_Membrane_GLP1"/>
+    <simple_state name="CellStateChart_Membrane_GLP1_Active" parent="CellStateChart_Membrane_GLP1"/>
+    <simple_state name="CellStateChart_Membrane_GLP1_Inactive" parent="CellStateChart_Membrane_GLP1"/>
+    <simple_state name="CellStateChart_Membrane_GLP1_Bound" parent="CellStateChart_Membrane_GLP1"/>
+    <simple_state name="CellStateChart_Membrane_GLP1_Unbound" parent="CellStateChart_Membrane_GLP1"/>
+    <compound_state name="CellStateChart_Membrane_GLP1" parent="CellStateChart" start="CellStateChart_Membrane_GLP1_Unbound"/>
+    <compound_state name="CellStateChart" parent="" start=",CellStateChart_Life_Living,CellStateChart_Abstract_Mitosis,CellStateChart_Cytoplasm_GLD1_Active,CellStateChart_Cytoplasm_LAG1_Active,CellStateChart_Membrane_GLP1_Unbound"/>
+
+</statechart>
