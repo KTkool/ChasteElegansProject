@@ -44,7 +44,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "RandomNumberGenerator.hpp"
 //At the moment, the statechart model used by this file is changed by altering THIS HEADER.
 //I need to find an easier way to set the statechart model as an input variable...
-#include "ExampleStatechartSerializable.hpp"
+#include "BasicStatechart.hpp"
 
 
 
@@ -65,13 +65,14 @@ class StatechartCellCycleModelSerializable : public AbstractCellCycleModel
 
 /** Standard serialization block, doesn't deal with saving the statechart. */
 friend class boost::serialization::access;
-    template<class Archive>
+    
+template<class Archive>
     void serialize(Archive & archive, const unsigned int version)
     {
-    archive & boost::serialization::base_object<AbstractCellCycleModel>(*this);
-    // Make sure any RandomNumberGenerator singleton gets saved too, to avoid phasing
-    SerializableSingleton<RandomNumberGenerator>* p_wrapper = RandomNumberGenerator::Instance()->GetSerializationWrapper();
-    archive & p_wrapper;
+        archive & boost::serialization::base_object<AbstractCellCycleModel>(*this);
+        // Make sure any RandomNumberGenerator singleton gets saved too, to avoid phasing
+        SerializableSingleton<RandomNumberGenerator>* p_wrapper = RandomNumberGenerator::Instance()->GetSerializationWrapper();
+        archive & p_wrapper;    
     }
 
 public:
@@ -79,12 +80,16 @@ public:
     /*Holds a pointer to this cell's statechart*/
     boost::shared_ptr<CellStatechart> pStatechart;    
     
+    bool mLoadingFromArchive;
+    std::vector<double> TempVariableStorage;
+    int TempStateStorage;
+
     /*Constructor. This:
     * 1) Makes a new AbstractCellCycleModel
     * 2) Overwrites certain cell cycle phase durations intended for the crypt with values suitable for C.elegans
     * 3) Leaves the statechart's pointer to its cell NULL
     */
-    StatechartCellCycleModelSerializable();    
+    StatechartCellCycleModelSerializable(bool LoadingFromArchive=false);    
 
     /*Because a cell cycle model doesn't have a pointer to its cell until AFTER construction, this is the method
     * where we set the cell pointer for this class AND pass it to the statechart. The method SetCell has been changed 
@@ -147,12 +152,12 @@ namespace serialization
         Archive & ar, const StatechartCellCycleModelSerializable* t, const BOOST_PFTO unsigned int file_version)
     {
         // Archive other member variables
-        uint state = t->pStatechart->GetState();
+        int state = t->pStatechart->GetState();
         ar << state;
         std::vector<double> v = t->pStatechart->GetVariables();
         int numberOfVars=v.size();
         ar << numberOfVars;
-        for(int i=0; i++; i<v.size()){
+        for(int i=0; i<v.size(); i++){
             ar<<v.at(i);
         }
     }
@@ -162,21 +167,21 @@ namespace serialization
         Archive & ar, StatechartCellCycleModelSerializable* t, const unsigned int file_version)
     {
     
-        uint state;
+        int state;
         ar >> state;
         int numberOfVars;
         ar >> numberOfVars;
         std::vector<double> v;
-        for(int i=0; i++; i<numberOfVars){
+        for(int i=0; i<numberOfVars; i++){
             double value;
             ar >> value;
             v.push_back(value);
         }
-
+        
         // Construct a new cell cycle model and set the statechart's state and variable values.
-        ::new(t)StatechartCellCycleModelSerializable();
-        t->pStatechart->SetState(state);
-        t->pStatechart->SetVariables(v);
+        ::new(t)StatechartCellCycleModelSerializable(true);
+        t->TempStateStorage=state;
+        t->TempVariableStorage=v;
     }
 }
 } // namespace ...

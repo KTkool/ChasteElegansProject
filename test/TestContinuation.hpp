@@ -80,25 +80,26 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "EggLayingForce.hpp"
 
+
 class TestContinuation : public AbstractCellBasedTestSuite
 {
 public:
 
-void Testcontinuation() throw(Exception)
-    {
-        /** The next line is needed because we cannot currently run node based simulations in parallel. */
-        EXIT_IF_PARALLEL;
+  void Testcontinuation() throw(Exception)
+  {
+    /** The next line is needed because we cannot currently run node based simulations in parallel. */
+    EXIT_IF_PARALLEL;
 
-        /*TEST LOAD*/
-        OffLatticeSimulation<3>* p_simulator
-            = CellBasedSimulationArchiver<3, OffLatticeSimulation<3> >::Load("GonadArmAdultRunSCC_D50_F15", 200.0);
-        p_simulator->SetEndTime(300.0);
-        p_simulator->Solve();
+    /*TEST LOAD*/
+    OffLatticeSimulation<3>* p_simulator
+        = CellBasedSimulationArchiver<3, OffLatticeSimulation<3> >::Load("TEST_REFACTORED_CODE", 5.0);
+  
+    p_simulator->SetEndTime(10.0);
+    p_simulator->Solve();
 
+    delete p_simulator;
+  }
 
-        CellBasedSimulationArchiver<3, OffLatticeSimulation<3> >::Save(p_simulator);
-        delete p_simulator;
-    }
 };
 
 #endif /* TESTCONTINUATION_HPP_ */

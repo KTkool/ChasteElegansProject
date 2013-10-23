@@ -56,11 +56,12 @@ class GonadArmPositionTrackerModifier : public AbstractCellBasedSimulationModifi
     void serialize(Archive & archive, const unsigned int version)
     {
         archive & boost::serialization::base_object<AbstractCellBasedSimulationModifier<DIM,DIM> >(*this);
+
     }
-private:
-    FILE* OutputPositionFile;
 
 public:
+
+    FILE* OutputPositionFile;
 
     /**
      * Default constructor.
@@ -95,5 +96,6 @@ public:
 
 #include "SerializationExportWrapper.hpp"
 EXPORT_TEMPLATE_CLASS_SAME_DIMS(GonadArmPositionTrackerModifier)
+
 
 #endif /*GONADARMPOSITIONTRACKERMODIFIER_HPP_*/

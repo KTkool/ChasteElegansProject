@@ -36,7 +36,12 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include"StatechartCellCycleModelSerializable.hpp"
 
 
-StatechartCellCycleModelSerializable::StatechartCellCycleModelSerializable(): AbstractCellCycleModel(){
+StatechartCellCycleModelSerializable::StatechartCellCycleModelSerializable(bool LoadingFromArchive): AbstractCellCycleModel(){
+	
+	mLoadingFromArchive=LoadingFromArchive;
+	TempVariableStorage=std::vector<double>();
+	TempStateStorage=0;
+
 	//Set some sensible C.Elegans germ cell defaults
 	mSDuration=8.33;
 	mG2Duration=6.66;
@@ -53,24 +58,45 @@ StatechartCellCycleModelSerializable::StatechartCellCycleModelSerializable(): Ab
 AbstractCellCycleModel* StatechartCellCycleModelSerializable::CreateCellCycleModel(){
 	//Create a new cell cycle model
 	StatechartCellCycleModelSerializable* newStatechartCellCycleModelSerializable = new StatechartCellCycleModelSerializable();
-	//Copy the parent's statechart.
-	boost::shared_ptr<CellStatechart> newStatechart=pStatechart->Copy();
-	//Give the new statechart to the daughter. Its cell pointer will be set when SetCell is called by the 
-    //daughter cell's constructor 
-	newStatechartCellCycleModelSerializable->pStatechart=newStatechart;
+	//Ensure values are inhereted from parent as appropriate
+	newStatechartCellCycleModelSerializable->SetBirthTime(mBirthTime);
+    newStatechartCellCycleModelSerializable->SetMinimumGapDuration(mMinimumGapDuration);
+    newStatechartCellCycleModelSerializable->SetStemCellG1Duration(mStemCellG1Duration);
+    newStatechartCellCycleModelSerializable->SetTransitCellG1Duration(mTransitCellG1Duration);
+    newStatechartCellCycleModelSerializable->SetSDuration(mSDuration);
+    newStatechartCellCycleModelSerializable->SetG2Duration(mG2Duration);
+    newStatechartCellCycleModelSerializable->SetMDuration(mMDuration);
+	newStatechartCellCycleModelSerializable->SetDimension(mDimension);
+	newStatechartCellCycleModelSerializable->mG1Duration=mG1Duration;
+	newStatechartCellCycleModelSerializable->mLoadingFromArchive=mLoadingFromArchive;
+	//Create a new statechart.
+	MAKE_PTR(CellStatechart, newStatechart);
+	//Set its cell pointer to the parent cell to avoid it being null when constructors are called.
+	newStatechart->SetCell(mpCell);
+	//Copy the state of the parent. Give result to the daughter cell cycle model.
+	newStatechartCellCycleModelSerializable->pStatechart=pStatechart->Copy(newStatechart);
+	//Return the new cell cycle model. The cell pointer will be made to point to the daughter when SetCell is called.
 	return newStatechartCellCycleModelSerializable;
  };
 
 
 void StatechartCellCycleModelSerializable::SetCell(CellPtr pCell){
     mpCell = pCell;
-	//NEW BIT: Switch the statechart's cell pointer to point to this cell.
+	//Switch the statechart's cell pointer to point to this cell.
  	pStatechart->SetCell(mpCell);
- 	printf("%s\n","SettingStatechartCellPointer");
+ 	//If we're loading from an archive, now is an appropriate time to initiate the statechart and set the stored state
+	//and variables. 
+	if(mLoadingFromArchive==true){
+		pStatechart->initiate();
+		pStatechart->SetState(TempStateStorage);
+		pStatechart->SetVariables(TempVariableStorage);
+		mLoadingFromArchive=false;
+	}
  };
 
 
 void StatechartCellCycleModelSerializable::Initialise(){
+	pStatechart->initiate();
  	//Handles advancing the cell to some point in the cell cycle so that the population
  	//DOES NOT start out synchronised.
 
@@ -83,18 +109,18 @@ void StatechartCellCycleModelSerializable::Initialise(){
 	//Fire an event to force the statechart to the appropriate phase
 	CellCyclePhase_ phase;
 	if(remainder<mG1Duration){
+		pStatechart->process_event(EvGoToCellStateChart_CellCycle_Mitosis_G1());
 		pStatechart->TimeInPhase=remainder;
-		pStatechart->process_event(EvGoToG1());
 	}else if(remainder>mG1Duration && remainder<mG1Duration+mSDuration){
+		pStatechart->process_event(EvGoToCellStateChart_CellCycle_Mitosis_S());
 		pStatechart->TimeInPhase=remainder-mG1Duration;
-		pStatechart->process_event(EvGoToS());
 	}
 	else if(remainder>mG1Duration+mSDuration && remainder<mG1Duration+mSDuration+mG2Duration){
+		pStatechart->process_event(EvGoToCellStateChart_CellCycle_Mitosis_G2());		
 		pStatechart->TimeInPhase=remainder-(mG1Duration+mSDuration);
-		pStatechart->process_event(EvGoToG2());
 	}else{
+		pStatechart->process_event(EvGoToCellStateChart_CellCycle_Mitosis_M());		
 		pStatechart->TimeInPhase=remainder-(mG1Duration+mSDuration+mG2Duration);
-		pStatechart->process_event(EvGoToM());
 	}
 };
 

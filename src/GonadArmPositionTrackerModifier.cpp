@@ -83,9 +83,9 @@ void GonadArmPositionTrackerModifier<DIM>::SetupSolve(AbstractCellPopulation<DIM
 {
 
 	/*Open a file to write output to*/
-    char prefix[512]="/tmp/kathryn/testoutput/";
-    char suffix[18]="/PositionData.txt";
-	OutputPositionFile=fopen(strcat(strcat(prefix,outputDirectory.c_str()),suffix),"w");
+  char prefix[512]="/tmp/kathryn/testoutput/";
+  char suffix[18]="/PositionData.txt";
+	OutputPositionFile=fopen(strcat(strcat(prefix,outputDirectory.c_str()),suffix),"a");
 
 }
 

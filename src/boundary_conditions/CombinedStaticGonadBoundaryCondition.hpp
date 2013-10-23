@@ -180,6 +180,7 @@ template<class Archive, unsigned DIM>
 inline void load_construct_data(
     Archive & ar, CombinedStaticGonadBoundaryCondition<DIM>* t, const unsigned int file_version)
 {
+
     // Retrieve data from archive required to construct new instance
     AbstractCellPopulation<DIM>* p_cell_population;
     ar >> p_cell_population;
@@ -196,6 +197,7 @@ inline void load_construct_data(
 
     // Invoke inplace constructor to initialise instance
     ::new(t)CombinedStaticGonadBoundaryCondition<DIM>(p_cell_population,StraightLengthLower,StraightLengthUpper,TurnRadius,CurrentTubeRadius,1e-5);
+
 }
 }
 } // namespace ...
