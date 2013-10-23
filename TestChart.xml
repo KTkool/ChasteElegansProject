@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<statechart>
+
+    <!-- Forward declare all events: Ev* -->
+    <event name="m" from="CellStateChart_CellCycle_Mitosis" to="CellStateChart_CellCycle_Meiosis" guard="state_cast&lt;const CellStateChart_GLD1_Active*&gt;()!=0 
+         &amp;&amp; GetTime()&gt;1"/>
+    <event name="divided" from="CellStateChart_CellCycle_Mitosis_M" to="CellStateChart_CellCycle_Mitosis_G1" guard="true"/>
+    <event name="chckpnt" from="CellStateChart_CellCycle_Mitosis_G2" to="CellStateChart_CellCycle_Mitosis_M" guard="true"/>
+    <event name="DNA" from="CellStateChart_CellCycle_Mitosis_S" to="CellStateChart_CellCycle_Mitosis_G2" guard="true"/>
+    <event name="copyDNA" from="CellStateChart_CellCycle_Mitosis_G1" to="CellStateChart_CellCycle_Mitosis_S" guard="true"/>
+    <event name="gld1down" from="CellStateChart_GLD1_Active" to="CellStateChart_GLD1_Inactive" guard="state_cast&lt;const CellStateChart_LAG1_Active*&gt;()!=0"/>
+    <event name="gld1up" from="CellStateChart_GLD1_Inactive" to="CellStateChart_GLD1_Active" guard="state_cast&lt;const CellStateChart_LAG1_Inactive*&gt;()!=0"/>
+    <event name="lag1down" from="CellStateChart_LAG1_Active" to="CellStateChart_LAG1_Inactive" guard="state_cast&lt;const CellStateChart_GLP1_Bound*&gt;()==0"/>
+    <event name="lag1up" from="CellStateChart_LAG1_Inactive" to="CellStateChart_LAG1_Active" guard="state_cast&lt;const CellStateChart_GLP1_Bound*&gt;()!=0"/>
+    <event name="glp1abs" from="CellStateChart_GLP1_Bound" to="CellStateChart_GLP1_Absent" guard="GetDistanceFromDTC(myCell)&gt;100"/>
+    <event name="glp1bind" from="CellStateChart_GLP1_Unbound" to="CellStateChart_GLP1_Bound" guard="GetDistanceFromDTC(myCell)&lt;15"/>
+
+    <!-- states -->
+    <simple_state name="CellStateChart_CellCycle_Meiosis" parent="CellStateChart_CellCycle"/>
+    <simple_state name="CellStateChart_CellCycle_Mitosis_M" parent="CellStateChart_CellCycle_Mitosis"/>
+    <simple_state name="CellStateChart_CellCycle_Mitosis_S" parent="CellStateChart_CellCycle_Mitosis"/>
+    <simple_state name="CellStateChart_CellCycle_Mitosis_G2" parent="CellStateChart_CellCycle_Mitosis"/>
+    <simple_state name="CellStateChart_CellCycle_Mitosis_G1" parent="CellStateChart_CellCycle_Mitosis"/>
+    <compound_state name="CellStateChart_CellCycle_Mitosis" parent="CellStateChart_CellCycle" start="CellStateChart_CellCycle_Mitosis_G1"/>
+    <compound_state name="CellStateChart_CellCycle" parent="CellStateChart" start="CellStateChart_CellCycle_Mitosis"/>
+    <simple_state name="CellStateChart_GLD1_Inactive" parent="CellStateChart_GLD1"/>
+    <simple_state name="CellStateChart_GLD1_Active" parent="CellStateChart_GLD1"/>
+    <compound_state name="CellStateChart_GLD1" parent="CellStateChart" start="CellStateChart_GLD1_Active"/>
+    <simple_state name="CellStateChart_LAG1_Inactive" parent="CellStateChart_LAG1"/>
+    <simple_state name="CellStateChart_LAG1_Active" parent="CellStateChart_LAG1"/>
+    <compound_state name="CellStateChart_LAG1" parent="CellStateChart" start="CellStateChart_LAG1_Active"/>
+    <simple_state name="CellStateChart_GLP1_Absent" parent="CellStateChart_GLP1"/>
+    <simple_state name="CellStateChart_GLP1_Bound" parent="CellStateChart_GLP1"/>
+    <simple_state name="CellStateChart_GLP1_Unbound" parent="CellStateChart_GLP1"/>
+    <compound_state name="CellStateChart_GLP1" parent="CellStateChart" start="CellStateChart_GLP1_Unbound"/>
+    <compound_state name="CellStateChart" parent="" start="CellStateChart_CellCycle,CellStateChart_GLD1,CellStateChart_LAG1,CellStateChart_GLP1"/>
+
+</statechart>
